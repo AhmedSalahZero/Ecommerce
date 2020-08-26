@@ -10,7 +10,7 @@ class Order extends Model
     const PROCESSING = 'processing';
     const PAYMENT_FAILED = 'payment_failed';
     const COMPLETED = 'completed' ;
-    protected $fillable = ['status' , 'address_id' , 'shipping_method_id' , 'subtotal'];
+    protected $fillable = ['status' , 'address_id' , 'shipping_method_id' , 'subtotal' ,'user_id'];
 
     public static function boot()
     {

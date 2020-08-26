@@ -16,6 +16,11 @@ class Cart
     {
         $this->user = $user ;
     }
+    public function products()
+    {
+        return $this->user->cart ;
+
+    }
     public function add($products){
 
 
@@ -93,7 +98,6 @@ class Cart
     }
     public function sync()
     {
-
         $this->user->cart()->each(function($product){
           //grip min quantity
             $quantity=$product->minStock($product->pivot->quantity);
@@ -103,11 +107,7 @@ if ($quantity != $product->pivot->quantity)
 {
     $this->changed=true ;
 }
-$product->pivot->update([
-               'quantity'=>$quantity
-            ]) ;
-
-
+$product->pivot->update(['quantity'=>$quantity]) ;
         });
     }
     public function hasChanged()

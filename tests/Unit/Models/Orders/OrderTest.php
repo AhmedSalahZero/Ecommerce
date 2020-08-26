@@ -2,6 +2,8 @@
 
 namespace Tests\Unit\Models\Orders;
 
+use App\cart\Cart;
+use App\Events\Orders\OrderCreated;
 use App\Models\Address;
 use App\Models\Country;
 use App\Models\Order;
@@ -9,6 +11,7 @@ use App\Models\ProductVariation;
 use App\Models\ShippingMethod;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
 class OrderTest extends TestCase
@@ -134,6 +137,8 @@ class OrderTest extends TestCase
         $user = factory(User::class)->create([
             'id'=>1000
         ]);
+        $product = factory(ProductVariation::class)->create();
+        $user->cart()->save($product);
         $country = factory(Country::class)->create();
         $shipping_method = factory(ShippingMethod::class)->create();
         $address=factory(Address::class)->create(['user_id'=>$user->id , 'country_id'=>$country->id]);
@@ -199,8 +204,58 @@ class OrderTest extends TestCase
         ]);
         $this->assertEquals(8 , $order->products->first()->pivot->quantity);
     }
+    public function test_it_fires_an_created_order_event_when_order_is_done()
+    {
+        Event::fake();
+
+        $user = factory(User::class)->create([
+            'id'=>1000
+        ]);
+       $user->cart()->save(factory(ProductVariation::class)->create());
+        $country = factory(Country::class)->create();
+        $shipping_method = factory(ShippingMethod::class)->create();
+        $address=factory(Address::class)->create(['user_id'=>$user->id , 'country_id'=>$country->id]);
+
+        $country->shippingMethods()->save($shipping_method);
+
+        $response = $this->jsonAs($user , 'post', 'api/orders' , [
+            'user_id'=>$user->id ,
+            'address_id'=>$address->id ,
+            'shipping_method_id'=>$shipping_method->id,
+        ]);
+
+        Event::assertDispatched(OrderCreated::class, function($event) use ($response){
+            return $event->order->id == json_decode($response->getContent())->data->id ;
+        });
 
 
+
+    }
+
+
+    public function test_the_cart_is_empty_after_make_the_order()
+    {
+        $user = factory(User::class)->create([
+            'id'=>1000
+        ]);
+        $user->cart()->save(factory(ProductVariation::class)->create());
+        $country = factory(Country::class)->create();
+        $shipping_method = factory(ShippingMethod::class)->create();
+        $address=factory(Address::class)->create(['user_id'=>$user->id , 'country_id'=>$country->id]);
+
+        $country->shippingMethods()->save($shipping_method);
+
+        $this->jsonAs($user , 'post', 'api/orders' , [
+            'user_id'=>$user->id ,
+            'address_id'=>$address->id ,
+            'shipping_method_id'=>$shipping_method->id,
+        ]);
+
+        $this->assertEquals(0,$user->cart->count());
+
+
+
+    }
 
 
 
