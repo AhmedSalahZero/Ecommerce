@@ -13,7 +13,7 @@ class ProductVariationCollection extends Collection
 
         return $this->keyBy('id')->map(function($product){
             return [
-                'quantity'=>$product->pivot->quantity
+                'quantity'=>min($product->pivot->quantity , $product->stockCount())
             ];
         })->toArray();
     }

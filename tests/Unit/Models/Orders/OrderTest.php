@@ -3,6 +3,7 @@
 namespace Tests\Unit\Models\Orders;
 
 use App\cart\Cart;
+use App\cart\Money;
 use App\Events\Orders\OrderCreated;
 use App\Models\Address;
 use App\Models\Country;
@@ -64,74 +65,9 @@ class OrderTest extends TestCase
         ]);
         $this->assertInstanceOf(ShippingMethod::class, $order->shippingMethod);
     }
-    public function test_it_must_be_authenticated_user()
-    {
-        $this->json('post' , 'api/orders')->assertStatus(401);
-    }
-    public function test_it_requires_an_address()
-    {
-        $user = factory(User::class)->create();
-        $this->jsonAS($user,'post' , 'api/orders')->assertJsonValidationErrors([
-            'address_id'
-        ]);
-    }
-
-    public function test_it_requires_the_address_to_be_exists()
-    {
-        $user = factory(User::class)->create();
-
-        $this->jsonAS($user,'post' , 'api/orders' ,['address_id'=>888])->assertJsonValidationErrors([
-            'address_id'
-        ]);
-
-    }
-    public function test_it_requires_the_address_belongs_to_the_user()
-    {
-        $user = factory(User::class)->create();
-        $newUser = factory(User::class)->create();
-        $address = factory(Address::class)->create([
-            'user_id'=>$user->id
-        ]);
-        $this->jsonAS($newUser,'post' , 'api/orders', ['address_id'=>$address->id])->assertJsonValidationErrors([
-            'address_id'
-        ]);
-
-    }
-    public function test_it_requires_a_shipping_method()
-    {
-        $user = factory(User::class)->create();
 
 
-        $this->jsonAS($user,'post' , 'api/orders' )->assertJsonValidationErrors([
-            'shipping_method_id'
-        ]);
 
-    }
-    public function test_it_requires_a_shipping_method_to_be_exists()
-    {
-        $user = factory(User::class)->create();
-        $this->jsonAS($user,'post' , 'api/orders',[
-            'shipping_method_id'=>88888
-        ] )->assertJsonValidationErrors([
-            'shipping_method_id'
-        ]);
-
-    }
-    public function test_it_requires_a_valid_shipping_method_for_the_given_address(){
-        $user = factory(User::class)->create();
-        $country = factory(Country::class)->create();
-        $address = factory(Address::class)->create([
-            'user_id'=>$user->id ,
-            'country_id'=>$country->id
-        ]);
-        $shippingMethod =factory(ShippingMethod::class)->create();
-  //      $country->shippingMethods()->save($shippingMethod);
-        $this->jsonAs($user,'POST' , 'api/orders' , [
-            'address_id'=>$address->id ,
-            'shipping_method_id'=>$shippingMethod->id
-        ])->assertJsonValidationErrors(['shipping_method_id']);
-
-    }
     public function test_it_can_create_an_order()
     {
         $user = factory(User::class)->create([
@@ -228,34 +164,45 @@ class OrderTest extends TestCase
             return $event->order->id == json_decode($response->getContent())->data->id ;
         });
 
-
-
     }
-
-
-    public function test_the_cart_is_empty_after_make_the_order()
+    public function test_it_return_a_money_instance_for_subtotal()
     {
-        $user = factory(User::class)->create([
-            'id'=>1000
-        ]);
-        $user->cart()->save(factory(ProductVariation::class)->create());
-        $country = factory(Country::class)->create();
-        $shipping_method = factory(ShippingMethod::class)->create();
-        $address=factory(Address::class)->create(['user_id'=>$user->id , 'country_id'=>$country->id]);
-
-        $country->shippingMethods()->save($shipping_method);
-
-        $this->jsonAs($user , 'post', 'api/orders' , [
-            'user_id'=>$user->id ,
-            'address_id'=>$address->id ,
-            'shipping_method_id'=>$shipping_method->id,
+        $order = factory(Order::class)->create([
+            'user_id'=>factory(User::class)->create()->id
         ]);
 
-        $this->assertEquals(0,$user->cart->count());
-
-
+        $this->assertInstanceOf(Money::class , $order->subtotal);
 
     }
+    public function test_it_return_a_money_instance_for_total()
+    {
+        $order = factory(Order::class)->create([
+            'user_id'=>factory(User::class)->create()->id
+        ]);
+
+        $this->assertInstanceOf(Money::class , $order->total());
+
+    }
+    public function test_it_adds_the_shipping_price_to_the_total_price()
+    {
+        $shippingMethod = factory(ShippingMethod::class)->create([
+            'price'=>1000
+        ]);
+        $order = factory(Order::class)->create([
+            'user_id'=>factory(User::class)->create()->id ,
+            'subtotal'=>1000
+        ]);
+
+        $this->assertEquals( 2000, $order->total()->amount());
+
+    }
+
+
+
+
+
+
+
 
 
 

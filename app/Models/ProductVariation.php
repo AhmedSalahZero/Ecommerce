@@ -26,6 +26,7 @@ class ProductVariation extends Model
     }
     public function stockCount()
     {
+
        return ($this->stock->sum('pivot.stock'));
 
         // or
@@ -33,6 +34,7 @@ class ProductVariation extends Model
     }
     public function minStock($count)
     {
+
         return min($this->stockCount()  , $count);
 
     }
@@ -42,12 +44,11 @@ class ProductVariation extends Model
     }
 
 
-    public function type(){
+    public function type()
+    {
         return $this->belongsTo(ProductVariationType::class , 'product_variation_type_id' ,
         'id');
     }
-
-
     public function product()
     {
         return $this->belongsTo(Product::class , 'product_id' , 'id');

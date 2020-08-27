@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\ProductVariation;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Collection;
 
@@ -32,7 +33,8 @@ class ProductVariationResource extends JsonResource
             'price'=>$this->FormattedPrice ,
             'productVaries'=>$this->productVaries() ,
             'stock_count'=>(int)$this->stockCount() ,
-            'in_stock'=>$this->inStock()
+            'in_stock'=>$this->inStock() ,
+            'product'=>new ProductIndexResource($this->product)
         ];
 
     }

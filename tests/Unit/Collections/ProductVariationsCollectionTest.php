@@ -18,11 +18,12 @@ class ProductVariationsCollectionTest extends TestCase
     {
         $user = factory(User::class)->create();
         $product =factory(ProductVariation::class)->create();
-        $user->cart()->attach($product , ['quantity'=>2]);
+        $user->cart()->attach($product , ['quantity'=>$quan=2]);
         $collection = new ProductVariationCollection($user->cart);
+
         $this->assertEquals($collection->forSyncing() , [
             $product->id =>[
-                'quantity'=>2
+                'quantity'=>min($quan , $product->stockCount())
             ]
         ]);
 

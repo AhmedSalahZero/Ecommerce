@@ -98,9 +98,12 @@ class Cart
     }
     public function sync()
     {
+
         $this->user->cart()->each(function($product){
           //grip min quantity
             $quantity=$product->minStock($product->pivot->quantity);
+
+
             //note That :  i want always the quantity i request to be less than the quantity that exists in the stock
             // note that : if the quantity i request is less than the quantity in the stock then there is not change will be happened
 if ($quantity != $product->pivot->quantity)
@@ -117,7 +120,7 @@ $product->pivot->update(['quantity'=>$quantity]) ;
     }
     public function CheckIfEmpty()
     {
- return       $this->user->cart->sum('pivot.quantity') == 0 ;
+ return       $this->user->cart->sum('pivot.quantity') <= 0 ;
 
     }
     public function subTotal()

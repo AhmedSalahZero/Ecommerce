@@ -14,5 +14,6 @@ $factory->define(Order::class, function (Faker $faker) {
        'address_id'=>factory(Address::class)->Create(['user_id'=>factory(User::class)->create()])->id ,
         'shipping_method_id'=>factory(ShippingMethod::class)->create() ,
         'subtotal'=> 1000 ,
+
     ];
 });

@@ -17,8 +17,18 @@ class OrderController extends Controller
     {
         $this->middleware('auth:api');
     }
+
+    public function index(Request $request)
+    {
+        $order = $request->user()->orders()->with(['address','shippingMethod' , 'products','products.stock'
+        ,'products.product' , 'products.product.variations','products.product.variations.stock'
+        ])->latest()->paginate(10);
+        return OrderResource::collection($order);
+    }
     public function store(OrderStoreRequest $request , Cart $cart)
     {
+
+        $cart->sync();
 
         if($cart->CheckIfEmpty())
         {
@@ -28,7 +38,7 @@ class OrderController extends Controller
 
         $this->cart = $cart ;
 
-         $order = $this->createOrder($request );
+         $order = $this->createOrder($request )->with(['address' , 'products','shippingMethod'])->first();
         $order->products()->sync($cart->products()->forSyncing());
 
         // this sync not the sync we have created before
