@@ -59,6 +59,11 @@ class Order extends Model
         )->withPivot(['quantity'])->withTimestamps();
 
     }
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class , 'order_id' , 'id');
+
+    }
 
 
 

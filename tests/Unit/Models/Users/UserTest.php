@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\ProductVariation;
 use App\Models\ShippingMethod;
 use App\Models\PaymentMethod;
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -74,6 +75,27 @@ class UserTest extends TestCase
         $paymentMethod = factory(PaymentMethod::class)->create(['user_id' => $user->id]);
         $this->assertInstanceOf(PaymentMethod::class , $user->paymentMethods->first());
 
+
+    }
+    public function test_it_has_many_transactions()
+    {
+        $user = factory(User::class)->create();
+
+        $order = factory(Order::class)->create([
+            'user_id'=>$user->id ,
+            'subtotal'=>1000 ,
+            'payment_method_id'=>factory(PaymentMethod::class)->create([
+                'user_id'=>$user->id
+            ])->id
+        ]);
+
+        $user->transactions()->create([
+            'order_id'=>$order->id ,
+            'user_id'=>$user->id ,
+            'amount'=>5  ,
+
+        ]);
+        $this->assertInstanceOf(Transaction::class , $user->Transactions->first());
 
     }
 

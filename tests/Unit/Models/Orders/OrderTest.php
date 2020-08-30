@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\PaymentMethod;
 use App\Models\ProductVariation;
 use App\Models\ShippingMethod;
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
@@ -228,9 +229,7 @@ class OrderTest extends TestCase
     public function test_it_adds_the_shipping_price_to_the_total_price()
     {
         $user = factory(User::class)->create();
-        $shippingMethod = factory(ShippingMethod::class)->create([
-            'price'=>1000
-        ]);
+
         $order = factory(Order::class)->create([
             'user_id'=>$user->id ,
             'subtotal'=>1000 ,
@@ -242,5 +241,28 @@ class OrderTest extends TestCase
         $this->assertEquals( 2000, $order->total()->amount());
 
     }
+    public function test_the_order_has_many_transactions()
+    {
+        $user = factory(User::class)->create();
+
+        $order = factory(Order::class)->create([
+            'user_id'=>$user->id ,
+            'subtotal'=>1000 ,
+            'payment_method_id'=>factory(PaymentMethod::class)->create([
+                'user_id'=>$user->id
+            ])->id
+        ]);
+
+        $order->transactions()->save(
+            factory(Transaction::class)->create([
+                'order_id'=>$order->id ,
+                'user_id'=>$user->id ,
+            ])
+        );
+       $this->assertInstanceOf(Transaction::class ,$order->transactions->first());
+
+    }
+
+
 
 }

@@ -19,6 +19,13 @@ class EventServiceProvider extends ServiceProvider
             'App\Listener\Orders\ProcessPayment',
             'App\Listener\Orders\EmptyCart'
         ],
+        'App\Events\Orders\OrderPaymentFailed' => [
+            'App\Listener\Orders\MarkOrderPaymentFailed',
+        ],
+        'App\Events\Orders\OrderPaid' => [
+            'App\Listener\Orders\CreateTransaction',
+            'App\Listener\Orders\MarkOrderProcessing',
+        ],
 
     ];
 
