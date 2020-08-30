@@ -16,6 +16,7 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $listen = [
         'App\Events\Orders\OrderCreated' => [
+            'App\Listener\Orders\ProcessPayment',
             'App\Listener\Orders\EmptyCart'
         ],
 

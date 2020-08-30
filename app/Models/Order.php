@@ -11,7 +11,7 @@ class Order extends Model
     const PROCESSING = 'processing';
     const PAYMENT_FAILED = 'payment_failed';
     const COMPLETED = 'completed' ;
-    protected $fillable = ['status' , 'address_id' , 'shipping_method_id' , 'subtotal' ,'user_id' , 'total'];
+    protected $fillable = ['status' , 'address_id' , 'shipping_method_id' , 'subtotal' ,'user_id' , 'total' ,'payment_method_id'];
 
     public static function boot()
     {
@@ -47,6 +47,10 @@ class Order extends Model
     {
         return $this->belongsTo(ShippingMethod::class);
 
+    }
+    public function paymentMethod()
+    {
+        return $this->belongsTo(paymentMethod::class,'payment_method_id','id');
     }
     public function products()
     {

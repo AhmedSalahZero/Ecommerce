@@ -19,7 +19,6 @@ class Cart
     public function products()
     {
         return $this->user->cart ;
-
     }
     public function add($products){
 

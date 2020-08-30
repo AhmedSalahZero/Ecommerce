@@ -20,14 +20,4 @@ abstract class TestCase extends BaseTestCase
         ]));
     }
 
-
-    public function testBasicTest()
-    {
-        $response = $this->get('/');
-
-
-
-        $response->assertStatus(200);
-
-    }
 }

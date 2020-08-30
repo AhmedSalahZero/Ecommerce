@@ -18,6 +18,7 @@ Route::resource('products' ,'Products\ProductController');
 Route::resource('addresses' ,'Addresses\AddressController');
 Route::resource('countries' ,'Countries\CountryController');
 Route::resource('orders' ,'Orders\OrderController');
+Route::resource('payment-methods' ,'paymentMethods\paymentMethodController');
 Route::get('addresses/{address}/shipping' ,'Addresses\AddressShippingController@action');
 
 //Route::get('test','Products\ProductController@test_fn');

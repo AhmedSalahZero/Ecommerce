@@ -28,6 +28,7 @@ class OrderController extends Controller
     public function store(OrderStoreRequest $request , Cart $cart)
     {
 
+
         $cart->sync();
 
         if($cart->CheckIfEmpty())
@@ -52,7 +53,7 @@ class OrderController extends Controller
     {
        return  $request->user()->orders()->create(
         array_merge(
-            $request->only(['address_id','shipping_method_id']) ,[
+            $request->only(['address_id','shipping_method_id' , 'payment_method_id']) ,[
             'subtotal'=>$this->cart->subTotal()->amount()
         ]));
     }

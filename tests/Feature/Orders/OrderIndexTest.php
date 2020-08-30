@@ -5,6 +5,7 @@ namespace Tests\Feature\Orders;
 use App\Models\Address;
 use App\Models\Country;
 use App\Models\Order;
+use App\Models\PaymentMethod;
 use App\Models\Product;
 use App\Models\ProductVariation;
 use App\Models\ShippingMethod;
@@ -48,7 +49,11 @@ class OrderIndexTest extends TestCase
         $order = factory(Order::Class)->create([
             'user_id'=>$user->id  ,
             'shipping_method_id'=>$ShippingMethod->id ,
-            'address_id'=>$address->id
+            'address_id'=>$address->id,
+            'payment_method_id'=>factory(PaymentMethod::class)->create([
+                'user_id'=>$user->id
+            ])->id
+
         ]);
         $order->products()->attach($product , [
             'quantity'=>4
@@ -79,13 +84,20 @@ class OrderIndexTest extends TestCase
         $order = factory(Order::Class)->create([
             'user_id'=>$user->id  ,
             'shipping_method_id'=>$ShippingMethod->id ,
-            'address_id'=>$address->id
+            'address_id'=>$address->id,
+            'payment_method_id'=>factory(PaymentMethod::class)->create([
+                'user_id'=>$user->id
+            ])->id
         ]);
         $another_order = factory(Order::Class)->create([
             'user_id'=>$user->id  ,
             'shipping_method_id'=>$ShippingMethod->id ,
             'address_id'=>$address->id  ,
-            'created_at'=>now()->subDay()
+            'created_at'=>now()->subDay(),
+            'payment_method_id'=>factory(PaymentMethod::class)->create([
+                'user_id'=>$user->id
+            ])->id
+
         ]);
 
         $responce = $this->jsonAs($user,'get' , 'api/orders')->assertSeeInOrder([

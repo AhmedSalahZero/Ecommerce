@@ -8,6 +8,7 @@ use App\Events\Orders\OrderCreated;
 use App\Models\Address;
 use App\Models\Country;
 use App\Models\Order;
+use App\Models\PaymentMethod;
 use App\Models\ProductVariation;
 use App\Models\ShippingMethod;
 use App\Models\User;
@@ -24,6 +25,10 @@ class OrderTest extends TestCase
         $user = factory(User::class)->create();
         $order = factory(Order::class)->create([
             'user_id'=>$user->id ,
+            'payment_method_id'=>factory(PaymentMethod::class)->create([
+                'user_id'=>$user->id
+            ])->id
+
         ]);
         $this->assertEquals('pending' , $order->status);
 
@@ -36,6 +41,9 @@ class OrderTest extends TestCase
             'address_id'=>factory(Address::class)->create([
                 'user_id'=>$user->id
             ])->id ,
+            'payment_method_id'=>factory(PaymentMethod::class)->create([
+                'user_id'=>$user->id
+            ])->id,
             'shipping_method_id'=>factory(ShippingMethod::class)->create()->id
         ]);
         $this->assertInstanceOf(User::class, $order->user);
@@ -48,6 +56,9 @@ class OrderTest extends TestCase
             'address_id'=>factory(Address::class)->create([
                 'user_id'=>$user->id
             ])->id ,
+            'payment_method_id'=>factory(PaymentMethod::class)->create([
+                'user_id'=>$user->id
+            ])->id,
             'shipping_method_id'=>factory(ShippingMethod::class)->create()->id
         ]);
         $this->assertInstanceOf(Address::class, $order->address);
@@ -58,6 +69,10 @@ class OrderTest extends TestCase
         $user = factory(User::class)->create();
         $order = factory(Order::class)->create([
             'user_id'=>$user->id ,
+            'payment_method_id'=>factory(PaymentMethod::class)->create([
+                'user_id'=>$user->id
+            ])->id
+            ,
             'address_id'=>factory(Address::class)->create([
                 'user_id'=>$user->id
             ])->id ,
@@ -85,6 +100,10 @@ class OrderTest extends TestCase
             'user_id'=>$user->id ,
             'address_id'=>$address->id ,
             'shipping_method_id'=>$shipping_method->id,
+            'payment_method_id'=>factory(PaymentMethod::class)->create([
+                'user_id'=>$user->id
+            ])->id
+
 
 
         ]);
@@ -92,6 +111,7 @@ class OrderTest extends TestCase
             'user_id'=>$user->id ,
             'address_id'=>$address->id ,
             'shipping_method_id'=>$shipping_method->id,
+
 
         ]);
 
@@ -110,6 +130,10 @@ class OrderTest extends TestCase
             'user_id'=>$user->id ,
             'address_id'=>$address->id ,
             'shipping_method_id'=>$Shipping_method->id,
+            'payment_method_id'=>factory(PaymentMethod::class)->create([
+                'user_id'=>$user->id
+            ])->id
+
         ]);
         $product = factory(ProductVariation::class)->create();
         $order->products()->save($product , [
@@ -133,6 +157,10 @@ class OrderTest extends TestCase
             'user_id'=>$user->id ,
             'address_id'=>$address->id ,
             'shipping_method_id'=>$Shipping_method->id,
+            'payment_method_id'=>factory(PaymentMethod::class)->create([
+                'user_id'=>$user->id
+            ])->id
+
         ]);
         $product = factory(ProductVariation::class)->create();
         $order->products()->save($product , [
@@ -158,6 +186,11 @@ class OrderTest extends TestCase
             'user_id'=>$user->id ,
             'address_id'=>$address->id ,
             'shipping_method_id'=>$shipping_method->id,
+            'payment_method_id'=>factory(PaymentMethod::class)->create([
+                'user_id'=>$user->id
+            ])->id
+
+
         ]);
 
         Event::assertDispatched(OrderCreated::class, function($event) use ($response){
@@ -167,8 +200,13 @@ class OrderTest extends TestCase
     }
     public function test_it_return_a_money_instance_for_subtotal()
     {
+        $user = factory(User::class)->create();
+
         $order = factory(Order::class)->create([
-            'user_id'=>factory(User::class)->create()->id
+            'user_id'=>$user->id ,
+            'payment_method_id'=>factory(PaymentMethod::class)->create([
+                'user_id'=>$user->id
+            ])->id
         ]);
 
         $this->assertInstanceOf(Money::class , $order->subtotal);
@@ -176,8 +214,12 @@ class OrderTest extends TestCase
     }
     public function test_it_return_a_money_instance_for_total()
     {
+        $user = factory(User::class)->create();
         $order = factory(Order::class)->create([
-            'user_id'=>factory(User::class)->create()->id
+            'user_id'=>$user->id ,
+            'payment_method_id'=>factory(PaymentMethod::class)->create([
+                'user_id'=>$user->id
+            ])->id
         ]);
 
         $this->assertInstanceOf(Money::class , $order->total());
@@ -185,27 +227,20 @@ class OrderTest extends TestCase
     }
     public function test_it_adds_the_shipping_price_to_the_total_price()
     {
+        $user = factory(User::class)->create();
         $shippingMethod = factory(ShippingMethod::class)->create([
             'price'=>1000
         ]);
         $order = factory(Order::class)->create([
-            'user_id'=>factory(User::class)->create()->id ,
-            'subtotal'=>1000
+            'user_id'=>$user->id ,
+            'subtotal'=>1000 ,
+            'payment_method_id'=>factory(PaymentMethod::class)->create([
+                'user_id'=>$user->id
+            ])->id
         ]);
 
         $this->assertEquals( 2000, $order->total()->amount());
 
     }
-
-
-
-
-
-
-
-
-
-
-
 
 }
